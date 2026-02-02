@@ -1,12 +1,12 @@
 {
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "express": "^5.2.1"
   },
   "name": "parsonal-todo-manager",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "devDependencies": {},
   "scripts": {
     "start": "node ./src/app.js"
   },
