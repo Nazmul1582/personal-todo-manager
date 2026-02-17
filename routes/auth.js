@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const bcrypt = require("bcrypt")
+const storeUser = require("../utils")
 
 router.post("/signup", async (req, res) => {
   let { username, password } = req.body
@@ -15,6 +16,7 @@ router.post("/signup", async (req, res) => {
     username,
     password: await bcrypt.hash(password, 10),
   }
+  storeUser(user)
   res.status(201).json({ message: "User created successfully!", data: user })
 })
 
