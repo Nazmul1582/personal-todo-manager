@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const bcrypt = require("bcrypt")
 const storeUser = require("../utils/storeUser")
+const getUser = require("../utils/getUser")
 
 router.post("/signup", async (req, res) => {
   try {
@@ -26,13 +27,24 @@ router.post("/signup", async (req, res) => {
   }
 })
 
-router.post("/login", (req, res) => {
-  const { username, password } = req.body
-  if (!username || !password)
-    return res
-      .status(400)
-      .json({ message: "username and password is required!" })
-  res.status(200).json({ message: "login sucessfull!" })
+router.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body
+    if (!username || !password)
+      return res
+        .status(400)
+        .json({ message: "username and password is required!" })
+    // check user
+    const user = await getUser(username)
+    if (user) {
+      res.cookie("userId", user.id)
+      res.status(200).json({ message: "login sucessfull!" })
+    } else {
+      res.status(400).json({ message: "Invalide credentials!" })
+    }
+  } catch (error) {
+    res.json({ message: error?.message })
+  }
 })
 
 module.exports = router
