@@ -37,6 +37,12 @@ router.post("/login", async (req, res) => {
     // check user
     const user = await getUser(username)
     if (user) {
+      try {
+        const result = await bcrypt.compare(password, user.password)
+        if (!result) return res.status(400).json({ message: "Wrong password!" })
+      } catch (error) {
+        console.log(error)
+      }
       res.cookie("userId", user.id)
       res.status(200).json({ message: "login sucessfull!" })
     } else {
