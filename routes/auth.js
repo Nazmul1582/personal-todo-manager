@@ -7,9 +7,9 @@ router.post("/signup", async (req, res) => {
   try {
     let { username, password } = req.body
     if (!username)
-      return res.status(401).json({ message: "Username is required!" })
+      return res.status(400).json({ message: "Username is required!" })
     if (!password)
-      return res.status(401).json({ message: "Password is required!" })
+      return res.status(400).json({ message: "Password is required!" })
     if (password && typeof password === "number") password = password.toString()
 
     const user = {
@@ -24,6 +24,15 @@ router.post("/signup", async (req, res) => {
       res.status(409).json({ message: error.message })
     else res.status(500).json({ message: "Server error" })
   }
+})
+
+router.post("/login", (req, res) => {
+  const { username, password } = req.body
+  if (!username || !password)
+    return res
+      .status(400)
+      .json({ message: "username and password is required!" })
+  res.status(200).json({ message: "login sucessfull!" })
 })
 
 module.exports = router

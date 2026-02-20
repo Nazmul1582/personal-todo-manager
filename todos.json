@@ -1,0 +1,20 @@
+[
+  {
+    "id": "t1",
+    "userId": "2b517214-8bdf-468a-be0e-5e5299ee8841",
+    "text": "Learn Node.js",
+    "createdAt": "2025-06-21T10:00:00Z"
+  },
+  {
+    "id": "t2",
+    "userId": "u223",
+    "text": "Learn Fast API",
+    "createdAt": "2025-07-20T10:00:00Z"
+  },
+  {
+    "id": "t3",
+    "userId": "2b517214-8bdf-468a-be0e-5e5299ee8841",
+    "text": "Learn Software Engineering",
+    "createdAt": "2026-02-01T10:00:00Z"
+  }
+]
