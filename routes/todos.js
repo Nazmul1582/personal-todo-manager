@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const path = require("path")
 const fs = require("fs/promises")
+const crypto = require("crypto")
 
 const todosFile = path.join(__dirname, "../todos.json")
 
@@ -24,7 +25,7 @@ router.get("/todos", async (req, res) => {
 router.post("/todo/create", async (req, res) => {
   try {
     const { text } = req.body
-    if (!text) {
+    if (!text?.trim()) {
       return res
         .status(400)
         .json({ message: "You must be provide the todo's content" })
@@ -34,7 +35,7 @@ router.post("/todo/create", async (req, res) => {
 
     const data = await fs.readFile(todosFile, "utf8")
     let todos = JSON.parse(data)
-    const todoId = `t${todos.length + 1}`
+    const todoId = crypto.randomUUID();
 
     const newTodo = {
       todoId,
@@ -45,8 +46,8 @@ router.post("/todo/create", async (req, res) => {
 
     todos.push(newTodo)
 
-    await fs.writeFile(todosFile, JSON.stringify(todos, null, 2))
-    res
+    await fs.writeFile(todosFile, JSON.stringify(todos, null, 2), "utf-8")
+    return res
       .status(201)
       .json({ message: "New todo created successfully!", data: newTodo })
   } catch (error) {
