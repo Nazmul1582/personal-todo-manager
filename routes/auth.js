@@ -18,6 +18,7 @@ router.post("/signup", async (req, res) => {
       username: username.trim().toLowerCase(),
       password: await bcrypt.hash(password, 10),
     }
+    // now store user to the users.json file
     await storeUser(user)
     res.status(201).json({ message: "User created successfully!", data: user })
   } catch (error) {

@@ -56,4 +56,24 @@ router.post("/todo/create", async (req, res) => {
   }
 })
 
+router.delete("/todo/delete/:id", async(req, res) => {
+  try {
+    const id = req.params.id;
+    if(!id){
+      return res.status(400).json({message: "Id is required!"})
+    }
+    const todos = await fs.readFile(todosFile, "utf-8");
+    const data = JSON.parse(todos);
+    const filteredTodos = data.filter(item => item.id !== id)
+
+    await fs.writeFile(todosFile, JSON.stringify(filteredTodos, null, 2), "utf-8");
+    return res.status(200).json({message: `${id} deleted successfully!`})
+  } catch (error) {
+    if(error.code === "ENOENT") {
+      return res.status(400).json({message: "No such file or directory!"})
+    }
+    return res.status(500).json({message: "Server error"})
+  }
+})
+
 module.exports = router
