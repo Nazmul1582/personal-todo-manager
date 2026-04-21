@@ -1,40 +1,40 @@
-const express = require("express")
-const router = express.Router()
-const path = require("path")
-const fs = require("fs/promises")
-const crypto = require("crypto")
+const express = require("express");
+const router = express.Router();
+const path = require("path");
+const fs = require("fs/promises");
+const crypto = require("crypto");
 
-const todosFile = path.join(__dirname, "../todos.json")
+const todosFile = path.join(__dirname, "../todos.json");
 
-router.get("/todos", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const data = await fs.readFile(todosFile, "utf8")
-    const todos = JSON.parse(data)
+    const data = await fs.readFile(todosFile, "utf8");
+    const todos = JSON.parse(data);
 
-    const userId = req.cookies.userId
-    const filteredTodos = todos.filter((item) => item.userId === userId)
-    return res.status(200).json(filteredTodos)
+    const userId = req.cookies.userId;
+    const filteredTodos = todos.filter((item) => item.userId === userId);
+    return res.status(200).json(filteredTodos);
   } catch (error) {
-    console.log("error", error)
+    console.log("error", error);
     if (error.code === "ENOENT") {
-      return res.status(404).json({ message: "No such file" })
-    } else return res.status(400).json({ message: error })
+      return res.status(404).json({ message: "No such file" });
+    } else return res.status(400).json({ message: error });
   }
-})
+});
 
-router.post("/todo/create", async (req, res) => {
+router.post("/create", async (req, res) => {
   try {
-    const { text } = req.body
+    const { text } = req.body;
     if (!text?.trim()) {
       return res
         .status(400)
-        .json({ message: "You must be provide the todo's content" })
+        .json({ message: "You must be provide the todo's content" });
     }
-    const userId = req.cookies.userId
-    const createdAt = new Date().toISOString()
+    const userId = req.cookies.userId;
+    const createdAt = new Date().toISOString();
 
-    const data = await fs.readFile(todosFile, "utf8")
-    let todos = JSON.parse(data)
+    const data = await fs.readFile(todosFile, "utf8");
+    let todos = JSON.parse(data);
     const todoId = crypto.randomUUID();
 
     const newTodo = {
@@ -42,38 +42,42 @@ router.post("/todo/create", async (req, res) => {
       userId,
       text,
       createdAt,
-    }
+    };
 
-    todos.push(newTodo)
+    todos.push(newTodo);
 
-    await fs.writeFile(todosFile, JSON.stringify(todos, null, 2), "utf-8")
+    await fs.writeFile(todosFile, JSON.stringify(todos, null, 2), "utf-8");
     return res
       .status(201)
-      .json({ message: "New todo created successfully!", data: newTodo })
+      .json({ message: "New todo created successfully!", data: newTodo });
   } catch (error) {
-    console.log(error)
-    res.status(400).json({ message: error.message })
+    console.log(error);
+    res.status(400).json({ message: error.message });
   }
-})
+});
 
-router.delete("/todo/delete/:id", async(req, res) => {
+router.delete("/delete/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    if(!id){
-      return res.status(400).json({message: "Id is required!"})
+    if (!id) {
+      return res.status(400).json({ message: "Id is required!" });
     }
     const todos = await fs.readFile(todosFile, "utf-8");
     const data = JSON.parse(todos);
-    const filteredTodos = data.filter(item => item.id !== id)
+    const filteredTodos = data.filter((item) => item.id !== id);
 
-    await fs.writeFile(todosFile, JSON.stringify(filteredTodos, null, 2), "utf-8");
-    return res.status(200).json({message: `${id} deleted successfully!`})
+    await fs.writeFile(
+      todosFile,
+      JSON.stringify(filteredTodos, null, 2),
+      "utf-8",
+    );
+    return res.status(200).json({ message: `${id} deleted successfully!` });
   } catch (error) {
-    if(error.code === "ENOENT") {
-      return res.status(400).json({message: "No such file or directory!"})
+    if (error.code === "ENOENT") {
+      return res.status(400).json({ message: "No such file or directory!" });
     }
-    return res.status(500).json({message: "Server error"})
+    return res.status(500).json({ message: "Server error" });
   }
-})
+});
 
-module.exports = router
+module.exports = router;
