@@ -1,0 +1,14 @@
+[
+  {
+    "id": "f4eeb0af-23a1-4cb2-bad4-5e86e8f899a2",
+    "username": "nazmul",
+    "password": "$2b$10$dKDDlTD9C1vvOaApuW6yq.8O11NOg3DjElGWT6xN1ju7KkLddNaoW",
+    "createdAt": "2026-04-21T16:31:30.095Z"
+  },
+  {
+    "id": "960b1d18-bf9d-45d0-9aad-d734c5c8d12a",
+    "username": "hasan",
+    "password": "$2b$10$p664Bj3vElF91ZuUFkkZTuzJ.zskBQ.o30VMFs2OnHYFOnY5WDeWC",
+    "createdAt": "2026-04-21T17:20:17.356Z"
+  }
+]
