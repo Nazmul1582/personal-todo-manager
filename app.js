@@ -2,7 +2,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./routes/authRoutes");
-const todoRoutes = require("./routes/todosRoutes");
+const todoRoutes = require("./routes/todoRoutes");
 const app = express();
 
 app.use(express.json());
