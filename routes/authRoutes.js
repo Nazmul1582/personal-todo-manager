@@ -100,7 +100,7 @@ router.post("/logout", (req, res) => {
   res.clearCookie("userId");
   res.status(200).json({
     sccess: true,
-    message: "Logout successful",
+    message: "Logged out",
   });
 });
 

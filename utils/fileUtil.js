@@ -41,10 +41,37 @@ const getUserByUsername = async (username) => {
   return user;
 };
 
+const getUserById = async (id) => {
+  const users = await getUsers();
+  const user = users.find((u) => u.id === id);
+  return user;
+};
+
+const getTodos = async () => {
+  return await readJsonFile(FILES.TODOS_FILE);
+};
+
+const getTodosById = async (id) => {
+  const todos = await getTodos();
+  const filteredTodos = todos.filter((t) => t.id === id);
+  return filteredTodos;
+};
+
+const getTodosByUserId = async (userId) => {
+  const todos = await getTodos();
+  const filteredTodos = todos.filter((t) => t.userId === userId);
+  return filteredTodos;
+};
+
 module.exports = {
   FILES,
   readJsonFile,
   writeJsonFile,
   getUsers,
+  getUserById,
   getUserByUsername,
+
+  getTodos,
+  getTodosById,
+  getTodosByUserId,
 };
