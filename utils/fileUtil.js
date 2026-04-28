@@ -9,9 +9,11 @@ const FILES = {
 
 const readJsonFile = async (file) => {
   try {
-    const data = await fs.readFile(file);
+    const data = await fs.readFile(file, "utf-8");
     return await JSON.parse(data);
   } catch (error) {
+    console.log("file read error: ", error);
+
     if (error.code === "ENOENT") return [];
     throw error;
   }
@@ -63,6 +65,17 @@ const getTodosByUserId = async (userId) => {
   return filteredTodos;
 };
 
+const saveTodos = async (todos) => {
+  return await writeJsonFile(FILES.TODOS_FILE, todos);
+};
+
+const createTodo = async (todo) => {
+  const todos = await getTodos();
+  todos.push(todo);
+  await saveTodos(todos);
+  return todo;
+};
+
 module.exports = {
   FILES,
   readJsonFile,
@@ -74,4 +87,5 @@ module.exports = {
   getTodos,
   getTodosById,
   getTodosByUserId,
+  createTodo,
 };
