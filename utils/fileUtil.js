@@ -10,6 +10,7 @@ const FILES = {
 const readJsonFile = async (file) => {
   try {
     const data = await fs.readFile(file, "utf-8");
+    if (!data) return [];
     return await JSON.parse(data);
   } catch (error) {
     console.log("file read error: ", error);
@@ -19,10 +20,8 @@ const readJsonFile = async (file) => {
   }
 };
 
-const writeJsonFile = async (file, item) => {
+const writeJsonFile = async (file, data) => {
   try {
-    const data = await readJsonFile(file);
-    data.push(item);
     await fs.writeFile(file, JSON.stringify(data, null, 2));
   } catch (error) {
     throw error;
@@ -31,6 +30,16 @@ const writeJsonFile = async (file, item) => {
 
 const getUsers = async () => {
   return await readJsonFile(FILES.USERS_FILE);
+};
+
+const saveUsers = async (users) => {
+  return await writeJsonFile(FILES.USERS_FILE, users);
+};
+
+const createUser = async (user) => {
+  const users = await getUsers();
+  users.push(user);
+  return await saveUsers(users);
 };
 
 const getUserByUsername = async (username) => {
@@ -53,16 +62,20 @@ const getTodos = async () => {
   return await readJsonFile(FILES.TODOS_FILE);
 };
 
-const getTodosById = async (id) => {
+const getTodoById = async (id) => {
   const todos = await getTodos();
-  const filteredTodos = todos.filter((t) => t.id === id);
-  return filteredTodos;
+  return todos.find((t) => t.id === id);
 };
 
 const getTodosByUserId = async (userId) => {
   const todos = await getTodos();
   const filteredTodos = todos.filter((t) => t.userId === userId);
   return filteredTodos;
+};
+
+const getTodoByUserId = async (userId) => {
+  const todos = await getTodos();
+  return todos.find((t) => t.userId === userId);
 };
 
 const saveTodos = async (todos) => {
@@ -76,16 +89,22 @@ const createTodo = async (todo) => {
   return todo;
 };
 
+const deleteTodo = async (id) => {
+  const todos = await getTodos();
+  const filteredTodos = todos.filter((t) => t.id !== id);
+  await saveTodos(filteredTodos);
+};
+
 module.exports = {
-  FILES,
-  readJsonFile,
-  writeJsonFile,
   getUsers,
   getUserById,
   getUserByUsername,
+  createUser,
 
   getTodos,
-  getTodosById,
+  getTodoById,
+  getTodoByUserId,
   getTodosByUserId,
   createTodo,
+  deleteTodo,
 };

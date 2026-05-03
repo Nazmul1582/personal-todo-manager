@@ -1,12 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const {
-  readJsonFile,
-  FILES,
-  writeJsonFile,
-  getUserByUsername,
-} = require("../utils/fileUtil");
+const { getUserByUsername, createUser } = require("../utils/fileUtil");
 
 router.post("/signup", async (req, res) => {
   try {
@@ -43,7 +38,8 @@ router.post("/signup", async (req, res) => {
       createdAt: new Date().toISOString(),
     };
 
-    await writeJsonFile(FILES.USERS_FILE, user);
+    await createUser(user);
+
     return res.status(201).json({
       success: true,
       message: "User created successfully",
