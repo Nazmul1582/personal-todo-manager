@@ -1,31 +1,41 @@
 const express = require("express");
-const router = express.Router();
+const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+const router = express.Router();
 const { getUserByUsername, createUser } = require("../utils/fileUtil");
 
 router.post("/signup", async (req, res) => {
   try {
     let { username, password } = req.body || {};
-    if (!username || !password)
+
+    username = String(username).trim().toLowerCase();
+    password = String(password).trim();
+
+    if (!username || !password) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
+    }
 
-    password = String(password).trim();
+    if (username.length < 3)
+      return res.status(400).json({
+        success: false,
+        message: "Username must be at least 3 characters",
+      });
 
-    if (password && password.length < 6)
+    if (password.length < 6)
       return res.status(400).json({
         success: false,
         message: "Password must be at least 6 characters",
       });
 
-    const isUsernameExist = await getUserByUsername(username);
-
-    if (isUsernameExist)
-      return res
-        .status(400)
-        .json({ success: false, message: "username already exist" });
+    const existingUser = await getUserByUsername(username);
+    if (existingUser)
+      return res.status(409).json({
+        success: false,
+        message: "Username already exists",
+      });
 
     const uuid = crypto.randomUUID();
     const saltOrRounds = 10;
@@ -33,7 +43,7 @@ router.post("/signup", async (req, res) => {
 
     const user = {
       id: uuid,
-      username: username.trim(),
+      username,
       password: hashedPassword,
       createdAt: new Date().toISOString(),
     };
@@ -45,8 +55,7 @@ router.post("/signup", async (req, res) => {
       message: "User created successfully",
     });
   } catch (error) {
-    console.log("Signup error", error);
-
+    console.error("Signup error", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -57,8 +66,17 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     let { username, password } = req.body || {};
-    username = username.trim();
+
+    username = String(username).trim();
     password = String(password).trim();
+
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Username and password are required",
+      });
+    }
+
     const user = await getUserByUsername(username);
     if (!user)
       return res.status(400).json({
@@ -67,11 +85,14 @@ router.post("/login", async (req, res) => {
       });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!match)
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
 
     res.cookie("userId", user.id, {
+      signed: true,
       httpOnly: true,
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
@@ -83,8 +104,7 @@ router.post("/login", async (req, res) => {
       message: "Login successful",
     });
   } catch (error) {
-    console.log("Login error", error);
-
+    console.error("Login error", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -93,9 +113,15 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
-  res.clearCookie("userId");
+  res.clearCookie("userId", {
+    signed: true,
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+  });
+
   res.status(200).json({
-    sccess: true,
+    success: true,
     message: "Logged out",
   });
 });

@@ -1,59 +1,54 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
+const authMiddleware = require("../middleware/authMiddleware");
 const {
-  getTodoByUserId,
   getTodosByUserId,
-  getUserById,
   createTodo,
   deleteTodo,
   getTodoById,
 } = require("../utils/fileUtil");
 
+router.use(authMiddleware);
+
 router.get("/", async (req, res) => {
   try {
-    const userId = req.cookies.userId;
-
-    const user = await getUserById(userId);
-    if (!user) return res.status(403).json({ message: "Forbidden" });
-
-    const todos = await getTodosByUserId(user.id);
+    const todos = await getTodosByUserId(req.user.id);
     res.status(200).json({
       success: true,
-      message: "Fetch data successfully",
+      message: "Fetched todos successfully",
       data: todos,
     });
   } catch (error) {
-    console.log("todos error", error);
-    res.status(400).json({ success: false, message: "Internal server error" });
+    console.error("todos error", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
-router.post("/create", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { text } = req.body || {};
-    if (!text.trim())
-      return res.status(400).json({ message: "text is required" });
-
-    const userId = req.cookies.userId;
-    const user = await getUserById(userId);
-
-    if (!user) return res.status(400).json({ message: "Unauthorized" });
+    if (typeof text !== "string" || !text.trim())
+      return res.status(400).json({
+        success: false,
+        message: "Text is required",
+      });
 
     const todo = {
       id: crypto.randomUUID(),
-      userId: userId,
+      userId: req.user.id,
       text: text.trim(),
       createdAt: new Date().toISOString(),
     };
+
     await createTodo(todo);
     res.status(201).json({
       success: true,
-      message: "Todo create successfully",
+      message: "Todo created successfully",
       data: todo,
     });
   } catch (error) {
-    console.log("create todo error: ", error);
+    console.error("create todo error", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -61,26 +56,22 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const id = req.params.id;
-    const userId = req.cookies.userId;
-    // check the todo is exists or not
-    const todo = await getTodoById(id);
+    const todoId = req.params.id;
+    const todo = await getTodoById(todoId);
     if (!todo)
       return res
         .status(404)
         .json({ success: false, message: "Todo not found" });
-    // check the userId is exists or not
-    const exists = await getTodoByUserId(userId);
-    console.log("valid", exists);
 
-    if (!exists)
+    if (todo.userId !== req.user.id)
       return res.status(403).json({ success: false, message: "Forbidden" });
-    await deleteTodo(id);
+
+    await deleteTodo(todoId);
     res.status(200).json({ success: true, message: "Todo has been deleted" });
   } catch (error) {
-    console.log("todo delete error");
+    console.error("todo delete error", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });

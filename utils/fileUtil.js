@@ -7,14 +7,18 @@ const FILES = {
   TODOS_FILE: path.join(DATA_DIR, "todos.json"),
 };
 
+const ensureDataDir = async () => {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+};
+
 const readJsonFile = async (file) => {
   try {
+    await ensureDataDir();
     const data = await fs.readFile(file, "utf-8");
     if (!data) return [];
-    return await JSON.parse(data);
+    return JSON.parse(data);
   } catch (error) {
-    console.log("file read error: ", error);
-
+    console.error("file read error:", error);
     if (error.code === "ENOENT") return [];
     throw error;
   }
